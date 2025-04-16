@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>C Compiler Visualizer</title>
+  <!-- Link to the external stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>C Compiler Visualizer</h1>
+  </header>
+
+  <main class="container">
+    <section class="input-section">
+      <label for="codeInput" class="section-title">Your C Code</label>
+      <textarea id="codeInput" placeholder="Enter C code here..."></textarea>
+      <div class="buttons">
+        <button id="tokenizeBtn">Tokenize</button>
+        <button id="parseBtn">Parse</button>
+      </div>
+    </section>
+
+    <section id="tokenOutput" class="output-section">
+      <h2 class="section-title">Tokens</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Token Type</th>
+              <th>Lexeme</th>
+            </tr>
+          </thead>
+          <tbody id="tokenTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="astOutput" class="output-section">
+      <h2 class="section-title">Abstract Syntax Tree</h2>
+      <!-- The AST tree or error messages go here -->
+    </section>
+  </main>
+
+  <footer>
+    <p>Made with ♥ for better understanding of C compilation</p>
+  </footer>
+
+  <!-- Scripts for lexer and parser -->
+  <script src="lexer.js"></script>
+  <script src="parser.js"></script>
+</body>
+</html>
