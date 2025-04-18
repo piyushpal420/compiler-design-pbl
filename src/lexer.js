@@ -32,15 +32,15 @@ const tokenRegex = {
 };
 
 function classifyLexeme(lexeme) {
-  for (const [type, regex] of Object.entries(tokenRegex)) {
+  for (const [type, regex] of Object.entries(tokenRegex)){
     if (regex.test(lexeme)) return { type, value: lexeme };
   }
   return { type: TokenType.UNDEFINED, value: lexeme };
 }
 
-function tokenize(inputCode) {
+function tokenize(inputCode) 
+{
   const tokens = [];
-
   // Match multiline comments and extract them first
   inputCode = inputCode.replace(/\/\*[\s\S]*?\*\//g, match => {
     tokens.push({ type: TokenType.COMMENT, value: match });
