@@ -14,7 +14,12 @@
   <main class="container">
     <section class="input-section">
       <label for="codeInput" class="section-title">Your C Code</label>
-      <textarea id="codeInput" placeholder="Enter C code here..."></textarea>
+      <textarea id="codeInput">int main()
+{
+  int a = 100;
+  printf("Hello World: %d\n", a);
+  return 0;
+}</textarea>
       <div class="buttons">
         <button id="tokenizeBtn">Tokenize</button>
         <button id="parseBtn">Parse</button>
