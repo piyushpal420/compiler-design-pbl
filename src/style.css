@@ -183,6 +183,5 @@ td {
 @media (max-width:400px) {
   .code{
     font-size: 0.9rem;
-    color: green;
   }
 }
