@@ -10,8 +10,8 @@ const TokenType = {
   SEPARATOR: 'SEPARATOR',
   OPEN_PAREN: 'OPEN_PAREN',
   CLOSE_PAREN: 'CLOSE_PAREN',
-  OPEN_BRACE: 'OPEN_BRACE',      // New token type for {
-  CLOSE_BRACE: 'CLOSE_BRACE',    // New token type for }
+  OPEN_BRACE: 'OPEN_BRACE',
+  CLOSE_BRACE: 'CLOSE_BRACE',
   COMMENT: 'COMMENT',
   UNDEFINED: 'UNDEFINED'
 };
@@ -24,10 +24,10 @@ const tokenRegex = {
   [TokenType.STRING_LITERAL]: /^"([^"\\]|\\.)*"/,
   [TokenType.OPERATOR]: /^(==|!=|<=|>=|\+\+|--|->|&&|\|\||[-+*/%=<>&^|!~])/,
   [TokenType.SEPARATOR]: /^[;,.:]/,
-  [TokenType.OPEN_PAREN]: /^[(]/,       // Only matches "("
-  [TokenType.CLOSE_PAREN]: /^[)]/,      // Only matches ")"
-  [TokenType.OPEN_BRACE]: /^[{]/,        // Matches "{"
-  [TokenType.CLOSE_BRACE]: /^[}]/,       // Matches "}"
+  [TokenType.OPEN_PAREN]: /^[(]/,
+  [TokenType.CLOSE_PAREN]: /^[)]/,
+  [TokenType.OPEN_BRACE]: /^[{]/,  
+  [TokenType.CLOSE_BRACE]: /^[}]/,
   [TokenType.COMMENT]: /^\/\/.*|^\/\*[\s\S]*?\*\//
 };
 
@@ -41,18 +41,15 @@ function classifyLexeme(lexeme) {
 function tokenize(inputCode) 
 {
   const tokens = [];
-  // Match multiline comments and extract them first
   inputCode = inputCode.replace(/\/\*[\s\S]*?\*\//g, match => {
     tokens.push({ type: TokenType.COMMENT, value: match });
-    return ' '.repeat(match.length); // keep positions
+    return ' '.repeat(match.length);
   });
 
   const lines = inputCode.split('\n');
 
   for (let line of lines) {
     let i = 0;
-
-    // Handle preprocessor directive
     if (/^\s*#/.test(line)) {
       const match = line.trim();
       tokens.push({ type: TokenType.PREPROCESSOR, value: match });
@@ -64,15 +61,11 @@ function tokenize(inputCode)
         i++;
         continue;
       }
-
-      // Handle single-line comment
       if (line[i] === '/' && line[i + 1] === '/') {
         const comment = line.slice(i);
         tokens.push({ type: TokenType.COMMENT, value: comment });
         break;
       }
-
-      // Match string literal
       if (line[i] === '"') {
         const match = line.slice(i).match(/^"([^"\\]|\\.)*"/);
         if (match) {
@@ -84,8 +77,6 @@ function tokenize(inputCode)
         }
         continue;
       }
-
-      // Match multi-char operators first
       const twoChar = line.slice(i, i + 2);
       if (tokenRegex[TokenType.OPERATOR].test(twoChar)) {
         tokens.push({ type: TokenType.OPERATOR, value: twoChar });
@@ -94,8 +85,6 @@ function tokenize(inputCode)
       }
 
       const oneChar = line[i];
-
-      // Single char matchers
       if (tokenRegex[TokenType.OPERATOR].test(oneChar)) {
         tokens.push({ type: TokenType.OPERATOR, value: oneChar });
         i++;
@@ -106,9 +95,6 @@ function tokenize(inputCode)
         i++;
         continue;
       }
-      // Check for grouping symbols in separate blocks
-      
-      // Parentheses
       if (tokenRegex[TokenType.OPEN_PAREN].test(oneChar)) {
         tokens.push({ type: TokenType.OPEN_PAREN, value: oneChar });
         i++;
@@ -119,7 +105,6 @@ function tokenize(inputCode)
         i++;
         continue;
       }
-      // Braces
       if (tokenRegex[TokenType.OPEN_BRACE].test(oneChar)) {
         tokens.push({ type: TokenType.OPEN_BRACE, value: oneChar });
         i++;
@@ -130,8 +115,6 @@ function tokenize(inputCode)
         i++;
         continue;
       }
-
-      // Match identifiers, numbers, and keywords
       let lexeme = '';
       while (i < line.length && /[a-zA-Z0-9_]/.test(line[i])) {
         lexeme += line[i++];
@@ -140,7 +123,7 @@ function tokenize(inputCode)
       if (lexeme.length > 0) {
         tokens.push(classifyLexeme(lexeme));
       } else {
-        // Unknown symbol
+
         tokens.push({ type: TokenType.UNDEFINED, value: oneChar });
         i++;
       }

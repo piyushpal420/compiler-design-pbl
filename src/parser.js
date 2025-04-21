@@ -1,23 +1,16 @@
-// parser.js
 
-let current = 0;  // Global index for iterating through tokens
+let current = 0;
 
-// Helper: Check if a token is a type specifier (e.g., int, char, float, double, void)
+
 function isTypeSpecifier(token) {
   const types = ['int', 'char', 'float', 'double', 'void'];
   return token.type === 'KEYWORD' && types.includes(token.value);
 }
 
-// -------------------------------------------------
-// Main Parse Function
-// -------------------------------------------------
 function parse(tokens) {
   return parseProgram(tokens);
 }
 
-// -------------------------------------------------
-// Parse the Entire Program
-// -------------------------------------------------
 function parseProgram(tokens) {
   let body = [];
   current = 0;
@@ -26,7 +19,6 @@ function parseProgram(tokens) {
   while (current < tokens.length) {
     let token = tokens[current];
 
-    // --- SKIP COMMENTS AT TOP LEVEL ---
     if (token.type === 'COMMENT') {
       current++;
       continue;
@@ -40,16 +32,13 @@ function parseProgram(tokens) {
       let funcNode = parseFunctionDefinition(tokens);
       if (funcNode) body.push(funcNode);
     } else {
-      // Skip unrecognized tokens
+
       current++;
     }
   }
   return { type: 'Program', body };
 }
 
-// -------------------------------------------------
-// Parse a Function Definition
-// -------------------------------------------------
 function parseFunctionDefinition(tokens) {
   console.log("parseFunctionDefinition: starting at token:", tokens[current]);
 
@@ -58,13 +47,11 @@ function parseFunctionDefinition(tokens) {
   let funcName = tokens[current].value;
   current++;
 
-  // Expect '(' for the parameter list
   if (!tokens[current] || tokens[current].type !== 'OPEN_PAREN') {
     return { error: "Expected '(' after function name" };
   }
-  current++; // Skip '('
+  current++; 
 
-  // Parse parameter list (simplified)
   let parameters = [];
   while (tokens[current] && tokens[current].value.trim() !== ')') {
     if (tokens[current].value.trim() === ',') {
@@ -81,9 +68,8 @@ function parseFunctionDefinition(tokens) {
       current++;
     }
   }
-  current++; // Skip ')'
+  current++;
 
-  // Expect '{' to start the function body
   if (!tokens[current] || tokens[current].type !== 'OPEN_BRACE') {
     return { error: "Expected '{' at beginning of function body" };
   }
@@ -97,9 +83,6 @@ function parseFunctionDefinition(tokens) {
   };
 }
 
-// -------------------------------------------------
-// Parse a Compound Statement (block "{ ... }")
-// -------------------------------------------------
 function parseCompoundStatement(tokens) {
   console.log("parseCompoundStatement: starting at token:", tokens[current]);
   if (tokens[current].type !== 'OPEN_BRACE') {
@@ -107,14 +90,14 @@ function parseCompoundStatement(tokens) {
     return { error: "Expected '{' at beginning of compound statement" };
   }
   let compound = { type: 'CompoundStatement', body: [] };
-  current++; // Skip '{'
+  current++;
 
   while (current < tokens.length && tokens[current].type !== 'CLOSE_BRACE') {
     let stmt = parseStatement(tokens);
     if (stmt) compound.body.push(stmt);
   }
   if (tokens[current] && tokens[current].type === 'CLOSE_BRACE') {
-    current++; // Skip '}'
+    current++;
   } else {
     console.error("Expected '}' at end of compound statement", tokens[current]);
     return { error: "Expected '}' at end of compound statement" };
@@ -122,14 +105,11 @@ function parseCompoundStatement(tokens) {
   return compound;
 }
 
-// -------------------------------------------------
-// Parse a Single Statement
-// -------------------------------------------------
 function parseStatement(tokens) {
   let token = tokens[current];
   if (!token) return null;
 
-  // --- SKIP COMMENTS INSIDE BLOCKS ---
+
   if (token.type === 'COMMENT') {
     current++;
     return null;
@@ -144,7 +124,7 @@ function parseStatement(tokens) {
   } else if (token.type === 'KEYWORD' && token.value === 'for') {
     return parseForStatement(tokens);
   } else if (isTypeSpecifier(token)) {
-    // Standalone declarations expect a trailing semicolon.
+
     return parseDeclaration(tokens, true);
   } else if (token.type === 'OPEN_BRACE') {
     return parseCompoundStatement(tokens);
@@ -153,60 +133,51 @@ function parseStatement(tokens) {
   }
 }
 
-// -------------------------------------------------
-// Parse a Return Statement: "return" expression ";"
-// -------------------------------------------------
 function parseReturnStatement(tokens) {
   console.log("parseReturnStatement: starting at token:", tokens[current]);
-  current++; // Skip 'return'
+  current++;
   let expr = parseExpression(tokens);
   if (tokens[current] && tokens[current].type === 'SEPARATOR' && tokens[current].value.trim() === ';') {
-    current++; // Skip ';'
+    current++;
   } else {
     console.error("Expected ';' after return statement", tokens[current]);
   }
   return { type: 'ReturnStatement', expression: expr };
 }
 
-// -------------------------------------------------
-// Parse an If Statement: "if" "(" condition ")" statement [ "else" statement ]
-// -------------------------------------------------
 function parseIfStatement(tokens) {
   console.log("parseIfStatement: starting at token:", tokens[current]);
-  current++; // Skip 'if'
+  current++; 
   if (!tokens[current] || tokens[current].type !== 'OPEN_PAREN') {
     console.error("Expected '(' after if", tokens[current]);
     return { error: "Expected '(' after if" };
   }
-  current++; // Skip '('
+  current++;
   let condition = parseExpression(tokens);
   if (!tokens[current] || tokens[current].type !== 'CLOSE_PAREN') {
     console.error("Expected ')' after if condition", tokens[current]);
     return { error: "Expected ')' after if condition" };
   }
-  current++; // Skip ')'
+  current++; 
   let thenStmt = parseStatement(tokens);
   let elseStmt = null;
   if (tokens[current] && tokens[current].type === 'KEYWORD' && tokens[current].value === 'else') {
-    current++; // Skip 'else'
+    current++; 
     elseStmt = parseStatement(tokens);
   }
   return { type: 'IfStatement', condition, then: thenStmt, else: elseStmt };
 }
 
-// -------------------------------------------------
-// Parse a For Statement: "for" "(" init ; condition ; increment ")" statement
-// -------------------------------------------------
+
 function parseForStatement(tokens) {
   console.log("parseForStatement: starting at token:", tokens[current]);
-  current++; // Skip 'for'
+  current++; 
   if (!tokens[current] || tokens[current].type !== 'OPEN_PAREN') {
     console.error("Expected '(' after for", tokens[current]);
     return { error: "Expected '(' after for" };
   }
-  current++; // Skip '('
+  current++; 
 
-  // (1) Initialization: can be a declaration or an expression.
   let initialization = null;
   if (tokens[current] && isTypeSpecifier(tokens[current])) {
     initialization = parseDeclaration(tokens, false);
@@ -214,28 +185,25 @@ function parseForStatement(tokens) {
     initialization = parseExpression(tokens);
   }
   if (tokens[current] && tokens[current].type === 'SEPARATOR' && tokens[current].value.trim() === ';') {
-    current++; // Consume semicolon after init
+    current++;
   } else {
     console.error("Expected ';' after for initialization", tokens[current]);
   }
 
-  // (2) Condition
   let condition = parseExpression(tokens);
   if (tokens[current] && tokens[current].type === 'SEPARATOR' && tokens[current].value.trim() === ';') {
-    current++; // Consume semicolon after condition
+    current++;
   } else {
     console.error("Expected ';' after for condition", tokens[current]);
   }
 
-  // (3) Increment
   let increment = parseExpression(tokens);
   if (!tokens[current] || tokens[current].type !== 'CLOSE_PAREN') {
     console.error("Expected ')' after for increment", tokens[current]);
     return { error: "Expected ')' after for increment" };
   }
-  current++; // Skip ')'
+  current++;
 
-  // (4) Loop body
   let body = parseStatement(tokens);
   return {
     type: 'ForStatement',
@@ -246,10 +214,6 @@ function parseForStatement(tokens) {
   };
 }
 
-// -------------------------------------------------
-// Parse a Declaration Statement
-// - Parameter: expectSemicolon is true for normal statements, false for for-loop init
-// -------------------------------------------------
 function parseDeclaration(tokens, expectSemicolon) {
   console.log(">>> parseDeclaration: Starting at token:", tokens[current]);
   let varType = tokens[current].value;
@@ -266,7 +230,7 @@ function parseDeclaration(tokens, expectSemicolon) {
     let initializer = null;
     if (tokens[current] && tokens[current].value.trim() === '=') {
       console.log("parseDeclaration: found '=' at token:", tokens[current]);
-      current++; // Skip '='
+      current++;
       initializer = parseExpression(tokens);
     }
     console.log("parseDeclaration: Adding variable", varName, "with initializer:", initializer);
@@ -275,12 +239,12 @@ function parseDeclaration(tokens, expectSemicolon) {
     if (!tokens[current]) break;
     if (tokens[current].value.trim() === ',') {
       console.log("parseDeclaration: found comma, continuing to next variable");
-      current++; // Skip comma
+      current++;
       continue;
     }
     if (expectSemicolon && tokens[current].type === 'SEPARATOR' && tokens[current].value.trim() === ';') {
       console.log("parseDeclaration: found semicolon, ending declaration");
-      current++; // Consume semicolon if expected
+      current++;
     }
     break;
   }
@@ -291,9 +255,6 @@ function parseDeclaration(tokens, expectSemicolon) {
   };
 }
 
-// -------------------------------------------------
-// Parse an Expression Statement: expression followed by ";"
-// -------------------------------------------------
 function parseExpressionStatement(tokens) {
   console.log("parseExpressionStatement: starting at token:", tokens[current]);
   let expr = parseExpression(tokens);
@@ -305,9 +266,6 @@ function parseExpressionStatement(tokens) {
   return { type: 'ExpressionStatement', expression: expr };
 }
 
-// -------------------------------------------------
-// Expression Parsing
-// -------------------------------------------------
 function parseExpression(tokens) {
   return parseAssignment(tokens);
 }
@@ -372,23 +330,18 @@ function parseMultiplicative(tokens) {
   return left;
 }
 
-// -------------------------------------------------
-// Parse Unary Expressions: Handle prefix operators (++b, --b)
-// -------------------------------------------------
+
 function parseUnary(tokens) {
   if (tokens[current] &&
       (tokens[current].value.trim() === '++' || tokens[current].value.trim() === '--')) {
     let op = tokens[current].value.trim();
     current++;
-    let argument = parseUnary(tokens);  // Recursively handle multiple prefixes
+    let argument = parseUnary(tokens);
     return { type: 'PrefixExpression', operator: op, argument };
   }
   return parsePostfix(tokens);
 }
 
-// -------------------------------------------------
-// Parse Postfix Expressions: Handle postfix operators (a++, a--)
-// -------------------------------------------------
 function parsePostfix(tokens) {
   let node = parsePrimary(tokens);
   while (tokens[current] &&
@@ -400,42 +353,35 @@ function parsePostfix(tokens) {
   return node;
 }
 
-// -------------------------------------------------
-// Parse Primary Expressions: Literals, Identifiers, Function Calls, Parenthesized Expressions
-// -------------------------------------------------
 function parsePrimary(tokens) {
   let token = tokens[current];
   if (!token) return null;
 
-  // --- Stop Check for for‑loop headers ---
   if ((token.type === 'SEPARATOR' && token.value.trim() === ';') || token.type === 'CLOSE_PAREN') {
     return null;
   }
 
-  // Numeric or string literal
   if (token.type === 'NUMBER' || token.type === 'STRING_LITERAL') {
     current++;
     return { type: 'Literal', value: token.value };
   }
 
-  // Identifier or function call
   if (token.type === 'IDENTIFIER' || (token.type === 'KEYWORD' && !isTypeSpecifier(token))) {
     current++;
     let node = { type: 'Identifier', name: token.value };
 
-    // Function call: if next token is '(' then parse arguments
     if (tokens[current] && tokens[current].type === 'OPEN_PAREN') {
-      current++; // Skip '('
+      current++;
       let args = [];
       while (tokens[current] && tokens[current].type !== 'CLOSE_PAREN') {
         let arg = parseExpression(tokens);
         args.push(arg);
         if (tokens[current] && tokens[current].value.trim() === ',') {
-          current++; // Skip ','
+          current++;
         }
       }
       if (tokens[current] && tokens[current].type === 'CLOSE_PAREN') {
-        current++; // Skip ')'
+        current++;
       } else {
         console.error("Expected ')' after function call arguments", tokens[current]);
       }
@@ -444,26 +390,22 @@ function parsePrimary(tokens) {
     return node;
   }
 
-  // Parenthesized expression: "(" expression ")"
   if (token.type === 'OPEN_PAREN') {
-    current++; // Skip '('
+    current++; 
     let expr = parseExpression(tokens);
     if (tokens[current] && tokens[current].type === 'CLOSE_PAREN') {
-      current++; // Skip ')'
+      current++;
     } else {
       console.error("Expected ')' after expression", tokens[current]);
     }
     return expr;
   }
 
-  // Fallback: unrecognized token
+
   current++;
   return { type: 'Unknown', value: token.value };
 }
 
-// -------------------------------------------------
-// AST Renderer: Recursively builds an HTML representation of the AST
-// -------------------------------------------------
 function renderAST(node) {
   if (typeof node !== 'object' || node === null) {
     return `<span class="ast-leaf">${node}</span>`;
@@ -487,9 +429,7 @@ function renderAST(node) {
   return html;
 }
 
-// -------------------------------------------------
-// Hook up the "Parse" button
-// -------------------------------------------------
+
 document.getElementById('parseBtn').addEventListener('click', () => {
   const input = document.getElementById('codeInput').value;
   const tokens = tokenize(input); // from your lexer.js
