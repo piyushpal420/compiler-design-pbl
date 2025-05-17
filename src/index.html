@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>C Compiler Visualizer</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Quadruple Table Styling for dark theme */
+    #quadrupleTable {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+    #quadrupleTable th, #quadrupleTable td {
+      border: 1px solid #444;
+      padding: 8px 12px;
+      text-align: center;
+      vertical-align: middle;
+      color: #00ffc3;
+      background-color: #121212;
+      word-break: break-word;
+    }
+    #quadrupleTable th {
+      background-color: #1e1e1e;
+      font-weight: 700;
+      color: #00ffb3;
+    }
+    #quadrupleTable tbody tr:hover {
+      background-color: #272727;
+      cursor: default;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -17,12 +45,15 @@
       <textarea id="codeInput" class="code">int main()
 {
   int a = 100;
-  printf("Hello World: %d\n", a);
+  int b = 200;
+  int c = a + b;
+  printf("%d\n", c);
   return 0;
 }</textarea>
       <div class="buttons">
         <button id="tokenizeBtn">Tokenize</button>
         <button id="parseBtn">Parse</button>
+        <button id="tacBtn">Show TAC</button>
       </div>
     </section>
 
@@ -43,17 +74,74 @@
 
     <section id="astOutput" class="output-section">
       <h2 class="section-title">Abstract Syntax Tree</h2>
-      <!-- The AST tree or error messages go here -->
+      <!-- AST tree or error messages here -->
+    </section>
+
+    <section id="tacOutput" class="output-section">
+      <h2 class="section-title">Three Address Code (Quadruple Representation)</h2>
+      <table id="quadrupleTable">
+        <thead>
+          <tr>
+            <th>Op</th>
+            <th>Arg1</th>
+            <th>Arg2</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="quadrupleBody">
+          <!-- TAC rows inserted here dynamically -->
+        </tbody>
+      </table>
     </section>
   </main>
 
   <footer>
-    <p>Made with ♥ for better understanding of C compilation</p><br>
+    <p>Made with ♥ for better understanding of C compilation</p><br />
     <p>By Mehdi Zaidi, Kirri Tharun, Tushar Dwivedi and Piyush Pal</p>
   </footer>
 
-
   <script src="lexer.js"></script>
   <script src="parser.js"></script>
+  <script src="threeAddressCode.js"></script>
+  <script>
+    function extractValue(field) {
+      if (!field) return '';
+      if (Array.isArray(field)) {
+        return field.map(f => f?.value || '').join(', ');
+      }
+      if (typeof field === 'object' && 'value' in field) {
+        return field.value;
+      }
+      return String(field);
+    }
+
+    document.getElementById('tacBtn').addEventListener('click', () => {
+      if (!window.lastAST) {
+        alert('Please parse the code first.');
+        return;
+      }
+
+      const tac = generateTAC(window.lastAST);
+      const tbody = document.getElementById('quadrupleBody');
+      tbody.innerHTML = '';
+
+      tac.forEach(instruction => {
+        const tr = document.createElement('tr');
+
+        const op = extractValue(instruction.op);
+        const arg1 = extractValue(instruction.arg1 || instruction.args?.[0]);
+        const arg2 = extractValue(instruction.arg2 || instruction.args?.[1]);
+        const result = extractValue(instruction.result || instruction.name || instruction.func || instruction.value);
+
+        [op, arg1, arg2, result].forEach(text => {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+    });
+  </script>
 </body>
 </html>
