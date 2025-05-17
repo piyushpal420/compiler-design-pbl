@@ -31,7 +31,7 @@ const tokenRegex = {
   [TokenType.COMMENT]: /^\/\/.*|^\/\*[\s\S]*?\*\//
 };
 
-function classifyLexeme(lexeme) {
+function classifyLexeme(lexeme){
   for (const [type, regex] of Object.entries(tokenRegex)){
     if (regex.test(lexeme)) return { type, value: lexeme };
   }
