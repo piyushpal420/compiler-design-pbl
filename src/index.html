@@ -123,17 +123,6 @@
 
       const tac = generateTAC(window.lastAST);
       window.lastTAC = tac;
-          // Download AST as JSON automatically
-  const blob = new Blob([JSON.stringify(window.lastTAC, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'tac.json';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
       const tbody = document.getElementById('quadrupleBody');
       tbody.innerHTML = '';
 
