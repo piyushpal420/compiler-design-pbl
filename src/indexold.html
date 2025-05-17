@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>C Compiler Visualizer</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Quadruple Table Styling for dark theme */
+    #quadrupleTable {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+    #quadrupleTable th, #quadrupleTable td {
+      border: 1px solid #444;
+      padding: 8px 12px;
+      text-align: center;
+      vertical-align: middle;
+      color: #00ffc3;
+      background-color: #121212;
+      word-break: break-word;
+    }
+    #quadrupleTable th {
+      background-color: #1e1e1e;
+      font-weight: 700;
+      color: #00ffb3;
+    }
+    #quadrupleTable tbody tr:hover {
+      background-color: #272727;
+      cursor: default;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -18,13 +46,16 @@
 {
   int a = 100;
   int b = 200;
-  int c = a+b;
+  int c = a + b;
+  int d = c + 100;
+  int e = d * 100;
   printf("%d\n", c);
   return 0;
 }</textarea>
       <div class="buttons">
         <button id="tokenizeBtn">Tokenize</button>
         <button id="parseBtn">Parse</button>
+        <button id="tacBtn">Show TAC</button>
       </div>
     </section>
 
@@ -45,17 +76,143 @@
 
     <section id="astOutput" class="output-section">
       <h2 class="section-title">Abstract Syntax Tree</h2>
-      <!-- The AST tree or error messages go here -->
+      <!-- AST tree or error messages here -->
+    </section>
+
+    <section id="tacOutput" class="output-section">
+      <h2 class="section-title">Three Address Code (Quadruple Representation)</h2>
+      <table id="quadrupleTable">
+        <thead>
+          <tr>
+            <th>Op</th>
+            <th>Arg1</th>
+            <th>Arg2</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="quadrupleBody">
+          <!-- TAC rows inserted here dynamically -->
+        </tbody>
+      </table>
     </section>
   </main>
 
   <footer>
-    <p>Made with ♥ for better understanding of C compilation</p><br>
+    <p>Made with ♥ for better understanding of C compilation</p><br />
     <p>By Mehdi Zaidi, Kirri Tharun, Tushar Dwivedi and Piyush Pal</p>
   </footer>
 
-
   <script src="lexer.js"></script>
   <script src="parser.js"></script>
+  <script src="threeAddressCode.js"></script>
+  <!-- <script>
+    function extractValue(field) {
+      if (!field) return '';
+      if (Array.isArray(field)) {
+        return field.map(f => f?.value || '').join(', ');
+      }
+      if (typeof field === 'object') {
+        return field.value ?? field.name ?? field.func ?? field;
+      }
+      return String(field);
+    }
+
+    document.getElementById('tacBtn').addEventListener('click', () => {
+      if (!window.lastAST) {
+        alert('Please parse the code first.');
+        return;
+      }
+
+      const tac = generateTAC(window.lastAST);
+      window.lastTAC = tac;
+
+      const tbody = document.getElementById('quadrupleBody');
+      tbody.innerHTML = '';
+
+      tac.forEach(instr => {
+        const tr = document.createElement('tr');
+
+        let op = extractValue(instr.op);
+        let arg1 = extractValue(instr.arg1 || instr.args?.[0] || instr.name || instr.func || instr.value);
+        let arg2 = extractValue(instr.arg2 || instr.args?.[1]);
+        let result = extractValue(instr.result);
+
+        // Specific TAC types override default arg/result logic
+        if (op === 'call') {
+          arg1 = instr.func || '';
+          arg2 = extractValue(instr.args);
+        } else if (op === 'return') {
+          arg1 = extractValue(instr.value);
+          arg2 = result = '';
+        }
+
+        [op, arg1, arg2, result].forEach(text => {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+    });
+  </script> -->
+<script>
+  function extractValue(field) {
+    if (field == null) return '';
+    if (Array.isArray(field)) {
+      // If it’s an array of token-like objects
+      return field.map(f => f?.value ?? '').join(', ');
+    }
+    if (typeof field === 'object') {
+      // Token object or temp/identifier
+      return field.value ?? field.name ?? '';
+    }
+    return String(field);
+  }
+
+  document.getElementById('tacBtn').addEventListener('click', () => {
+    if (!window.lastAST) {
+      alert('Please parse the code first.');
+      return;
+    }
+
+    const tac = generateTAC(window.lastAST);
+    window.lastTAC = tac;
+    console.log(tac);
+
+    // // Download AST as JSON automatically
+    // const blob = new Blob([JSON.stringify(tac, null, 2)], { type: 'application/json' });
+    // const url = URL.createObjectURL(blob);
+    // const a = document.createElement('a');
+    // a.href = url;
+    // a.download = 'tac.json';
+    // a.style.display = 'none';
+    // document.body.appendChild(a);
+    // a.click();
+    // document.body.removeChild(a);
+    // URL.revokeObjectURL(url);
+
+
+    const tbody = document.getElementById('quadrupleBody');
+    tbody.innerHTML = '';
+
+    tac.forEach(instr => {
+      const tr = document.createElement('tr');
+
+      const op     = extractValue(instr.op);
+      const arg1   = extractValue(instr.arg1);
+      const arg2   = extractValue(instr.arg2);
+      const result = extractValue(instr.result);
+
+      [op, arg1, arg2, result].forEach(text => {
+        const td = document.createElement('td');
+        td.textContent = text;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  });
+</script>
 </body>
 </html>
