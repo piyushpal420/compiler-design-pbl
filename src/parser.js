@@ -435,6 +435,18 @@ document.getElementById('parseBtn').addEventListener('click', () => {
   const tokens = tokenize(input); // from your lexer.js
   console.log("TOKENS:", tokens);
   const ast = parse(tokens);
+  // // Download AST as JSON automatically
+  // const blob = new Blob([JSON.stringify(ast, null, 2)], { type: 'application/json' });
+  // const url = URL.createObjectURL(blob);
+  // const a = document.createElement('a');
+  // a.href = url;
+  // a.download = 'ast.json';
+  // a.style.display = 'none';
+  // document.body.appendChild(a);
+  // a.click();
+  // document.body.removeChild(a);
+  // URL.revokeObjectURL(url);
+  window.lastAST = ast;
   console.log("AST:", ast);
   const astOutput = document.getElementById('astOutput');
   astOutput.innerHTML = renderAST(ast);
