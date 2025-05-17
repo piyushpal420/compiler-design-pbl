@@ -47,6 +47,8 @@
   int a = 100;
   int b = 200;
   int c = a + b;
+  int d = c + 100;
+  int e = d * 100;
   printf("%d\n", c);
   return 0;
 }</textarea>
@@ -109,8 +111,8 @@
       if (Array.isArray(field)) {
         return field.map(f => f?.value || '').join(', ');
       }
-      if (typeof field === 'object' && 'value' in field) {
-        return field.value;
+      if (typeof field === 'object') {
+        return field.value ?? field.name ?? field.func ?? field;
       }
       return String(field);
     }
@@ -123,16 +125,26 @@
 
       const tac = generateTAC(window.lastAST);
       window.lastTAC = tac;
+
       const tbody = document.getElementById('quadrupleBody');
       tbody.innerHTML = '';
 
-      tac.forEach(instruction => {
+      tac.forEach(instr => {
         const tr = document.createElement('tr');
 
-        const op = extractValue(instruction.op);
-        const arg1 = extractValue(instruction.arg1 || instruction.args?.[0]);
-        const arg2 = extractValue(instruction.arg2 || instruction.args?.[1]);
-        const result = extractValue(instruction.result || instruction.name || instruction.func || instruction.value);
+        let op = extractValue(instr.op);
+        let arg1 = extractValue(instr.arg1 || instr.args?.[0] || instr.name || instr.func || instr.value);
+        let arg2 = extractValue(instr.arg2 || instr.args?.[1]);
+        let result = extractValue(instr.result);
+
+        // Specific TAC types override default arg/result logic
+        if (op === 'call') {
+          arg1 = instr.func || '';
+          arg2 = extractValue(instr.args);
+        } else if (op === 'return') {
+          arg1 = extractValue(instr.value);
+          arg2 = result = '';
+        }
 
         [op, arg1, arg2, result].forEach(text => {
           const td = document.createElement('td');
