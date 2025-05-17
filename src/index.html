@@ -102,59 +102,67 @@
     <p>By Mehdi Zaidi, Kirri Tharun, Tushar Dwivedi and Piyush Pal</p>
   </footer>
 
-  <script src="lexer.js"></script>
-  <script src="parser.js"></script>
-  <script src="threeAddressCode.js"></script>
-  <script>
-    function extractValue(field) {
-      if (!field) return '';
-      if (Array.isArray(field)) {
-        return field.map(f => f?.value || '').join(', ');
-      }
-      if (typeof field === 'object') {
-        return field.value ?? field.name ?? field.func ?? field;
-      }
-      return String(field);
+<script src="lexer.js"></script>
+<script src="parser.js"></script>
+<script src="threeAddressCode.js"></script>
+<script>
+  function extractValue(field) {
+    if (field == null) return '';
+    if (Array.isArray(field)) {
+      return field.map(f => f?.value ?? '').join(', ');
     }
+    if (typeof field === 'object') {
+      return field.value ?? field.name ?? '';
+    }
+    return String(field);
+  }
 
-    document.getElementById('tacBtn').addEventListener('click', () => {
-      if (!window.lastAST) {
-        alert('Please parse the code first.');
-        return;
-      }
+  document.getElementById('tacBtn').addEventListener('click', () => {
+    if (!window.lastAST) {
+      alert('Please parse the code first.');
+      return;
+    }
+    const tac = generateTAC(window.lastAST);
+    window.lastTAC = tac;
+    download(tac, "tac");
+    const tbody = document.getElementById('quadrupleBody');
+    tbody.innerHTML = '';
 
-      const tac = generateTAC(window.lastAST);
-      window.lastTAC = tac;
+    tac.forEach(instr => {
+      const tr = document.createElement('tr');
 
-      const tbody = document.getElementById('quadrupleBody');
-      tbody.innerHTML = '';
+      const op     = extractValue(instr.op);
+      const arg1   = extractValue(instr.arg1);
+      const arg2   = extractValue(instr.arg2);
+      const result = extractValue(instr.result);
 
-      tac.forEach(instr => {
-        const tr = document.createElement('tr');
-
-        let op = extractValue(instr.op);
-        let arg1 = extractValue(instr.arg1 || instr.args?.[0] || instr.name || instr.func || instr.value);
-        let arg2 = extractValue(instr.arg2 || instr.args?.[1]);
-        let result = extractValue(instr.result);
-
-        // Specific TAC types override default arg/result logic
-        if (op === 'call') {
-          arg1 = instr.func || '';
-          arg2 = extractValue(instr.args);
-        } else if (op === 'return') {
-          arg1 = extractValue(instr.value);
-          arg2 = result = '';
-        }
-
-        [op, arg1, arg2, result].forEach(text => {
-          const td = document.createElement('td');
-          td.textContent = text;
-          tr.appendChild(td);
-        });
-
-        tbody.appendChild(tr);
+      [op, arg1, arg2, result].forEach(text => {
+        const td = document.createElement('td');
+        td.textContent = text;
+        tr.appendChild(td);
       });
+
+      tbody.appendChild(tr);
     });
-  </script>
+  });
+
+  function download(x, y)
+  {
+    
+    // Download AST as JSON automatically
+    const blob = new Blob([JSON.stringify(x, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = y+'.json';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+
+
 </body>
 </html>

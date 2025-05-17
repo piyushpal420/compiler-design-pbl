@@ -1,4 +1,5 @@
 let tempCount = 0;
+
 function newTemp() {
   return `t${tempCount++}`;
 }
@@ -7,63 +8,67 @@ function generateTAC(ast) {
   const tac = [];
   tempCount = 0;
 
-  function processExpression(node) 
-  {
+  function processExpression(node) {
     if (!node) return null;
 
     switch (node.type) {
       case "Literal":
-        return { type: "NUMBER", value: node.value };
+      case "NumberLiteral":
+        return node.value;
 
       case "Identifier":
-        return { type: "IDENTIFIER", value: node.name };
+        return node.name;
+
+      case "Unknown":
+        // Strip leading operator if merged
+        if (typeof node.value === 'string') {
+          return node.value.replace(/^[+\-*/]/, '');
+        }
+        return node.value;
 
       case "BinaryExpression": {
         const left = processExpression(node.left);
         const right = processExpression(node.right);
-        const temp = { type: "IDENTIFIER", value: newTemp() };
-        tac.push({
-          op: { type: "OPERATOR", value: node.operator },
-          arg1: left,
-          arg2: right,
-          result: temp
-        });
+        const temp = newTemp();
+        tac.push({ op: node.operator, arg1: left, arg2: right, result: temp });
         return temp;
       }
 
       case "AssignmentExpression": {
         const right = processExpression(node.right);
-        const left = { type: "IDENTIFIER", value: node.left.name };
-        tac.push({
-          op: { type: "OPERATOR", value: "=" },
-          arg1: right,
-          arg2: null,
-          result: left
-        });
-        return left;
+        const leftName = node.left?.name || node.left?.value;
+        tac.push({ op: "=", arg1: right, arg2: null, result: leftName });
+        return leftName;
       }
 
-    case "FunctionCall": {
-      const funcName = node.name?.name || node.name || "anonymous_func";
+      case "FunctionCall":
+      case "CallExpression": {
+        // Determine function name
+        let funcName = typeof node.name === 'string'
+          ? node.name
+          : node.name?.name || node.callee?.name || 'anonymous_func';
 
-      const args = Array.isArray(node.args)
-        ? node.args.map(arg => processExpression(arg))
-        : [];
+        // Determine arguments array
+        const argsArr = Array.isArray(node.args)
+          ? node.args
+          : Array.isArray(node.arguments)
+            ? node.arguments
+            : [];
 
-      tac.push({
-        op: { type: "KEYWORD", value: "call" },
-        func: funcName,
-        args: args
-      });
+        // Emit param for each argument
+        argsArr.forEach(argNode => {
+          const val = processExpression(argNode);
+          tac.push({ op: 'param', arg1: val, arg2: null, result: null });
+        });
 
-      return null;
-    }
-
+        // Emit call
+        tac.push({ op: 'call', arg1: funcName, arg2: null, result: null });
+        return null;
+      }
 
       default:
-        console.warn("Unhandled expression type:", node.type, JSON.stringify(node, null, 2));
-        return { type: "UNKNOWN", value: "?" };
-
+        console.warn('Unhandled expr type:', node.type);
+        return null;
     }
   }
 
@@ -71,54 +76,57 @@ function generateTAC(ast) {
     if (!node) return;
 
     switch (node.type) {
-      case "Program":
+      case 'Program':
         node.body.forEach(processNode);
         break;
 
-      case "FunctionDeclaration": {
-        const funcName = node.id?.name || node.name || "anonymous_func";
-        tac.push({ op: { type: "KEYWORD", value: "func" }, name: funcName });
+      case 'FunctionDeclaration': {
+        const name = node.id?.name || node.name || 'anonymous_func';
+        tac.push({ op: 'func', arg1: null, arg2: null, result: name });
         processNode(node.body);
-        tac.push({ op: { type: "KEYWORD", value: "endfunc" }, name: funcName });
+        tac.push({ op: 'endfunc', arg1: null, arg2: null, result: name });
         break;
       }
 
-      case "CompoundStatement":
+      case 'BlockStatement':
+      case 'CompoundStatement':
         node.body.forEach(processNode);
         break;
 
-      case "DeclarationStatement":
-        node.variables.forEach(v => {
-          if (v.initializer) {
-            const exprResult = processExpression(v.initializer);
-            tac.push({
-              op: { type: "OPERATOR", value: "=" },
-              arg1: exprResult,
-              arg2: null,
-              result: { type: "IDENTIFIER", value: v.name }
-            });
+      case 'VariableDeclaration':
+      case 'DeclarationStatement': {
+        const decls = node.declarations || node.variables || [];
+        decls.forEach(d => {
+          const init = d.init || d.initializer;
+          if (init) {
+            const val = processExpression(init);
+            const varName = d.id?.name || d.name;
+            tac.push({ op: '=', arg1: val, arg2: null, result: varName });
           }
         });
         break;
+      }
 
-      case "ExpressionStatement":
+      case 'ExpressionStatement':
         processExpression(node.expression);
         break;
 
-      case "ReturnStatement": {
-        const retVal = processExpression(node.expression);
-        tac.push({
-          op: { type: "KEYWORD", value: "return" },
-          value: retVal
-        });
+      case 'ReturnStatement': {
+        const expr = node.argument || node.expression;
+        const val = processExpression(expr);
+        tac.push({ op: 'return', arg1: val, arg2: null, result: null });
         break;
       }
 
       default:
-        console.warn("Unhandled node type:", node.type);
+        console.warn('Unhandled node type:', node.type);
     }
   }
 
   processNode(ast);
   return tac;
 }
+
+window.generateTAC = generateTAC;
+
+
