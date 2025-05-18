@@ -129,6 +129,7 @@
 <script src="lexer.js"></script>
 <script src="parser.js"></script>
 <script src="threeAddressCode.js"></script>
+<script src="codeOptimizer.js"></script>
 <script>
 
 
@@ -151,7 +152,7 @@
     }
     const tac = generateTAC(window.lastAST);
     window.lastTAC = tac;
-    download(tac, "tac");
+    //download(tac, "tac");
     const tbody = document.getElementById('quadrupleBody');
     tbody.innerHTML = '';
 
