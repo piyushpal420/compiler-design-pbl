@@ -60,15 +60,16 @@
     <section class="input-section">
       <label for="codeInput" class="section-title">Your C Code</label>
       <textarea id="codeInput" class="code">int main()
-{
-  int a = 100;
-  int b = 200;
-  int c = a + b;
-  int d = c + 100;
-  int e = d * 100;
-  printf("%d\n", c);
-  return 0;
-}</textarea>
+        int main() {
+    int t0 = 3 + 5;
+    int x = t0;
+    int t1 = x + 7;
+    int y = t1;
+    int c = 42;  // Assume c is some value to be printed
+    printf("%d\n", c);
+    return 0;
+}
+</textarea>
       <div class="buttons">
         <button id="tokenizeBtn">Tokenize</button>
         <button id="parseBtn">Parse</button>
