@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     /* Quadruple Table Styling for dark theme */
-    #quadrupleTable {
+    /* #quadrupleTable {
       border-collapse: collapse;
       width: 100%;
       margin-top: 10px;
@@ -36,7 +36,41 @@
     #quadrupleTable tbody tr:hover {
       background-color: #272727;
       cursor: default;
-    }
+    } */
+     #quadrupleTable,
+  #optimizedQuadrupleTable {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+    font-family: monospace;
+    font-size: 0.95rem;
+  }
+
+  #quadrupleTable th,
+  #quadrupleTable td,
+  #optimizedQuadrupleTable th,
+  #optimizedQuadrupleTable td {
+    border: 1px solid #444;
+    padding: 8px 12px;
+    text-align: center;
+    vertical-align: middle;
+    color: #00ffc3;
+    background-color: #121212;
+    word-break: break-word;
+  }
+
+  #quadrupleTable th,
+  #optimizedQuadrupleTable th {
+    background-color: #1e1e1e;
+    font-weight: 700;
+    color: #00ffb3;
+  }
+
+  #quadrupleTable tbody tr:hover,
+  #optimizedQuadrupleTable tbody tr:hover {
+    background-color: #272727;
+    cursor: default;
+  }
   </style>
 </head>
 
