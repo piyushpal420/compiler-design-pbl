@@ -126,31 +126,17 @@
     <p>By Mehdi Zaidi, Kirri Tharun, Tushar Dwivedi and Piyush Pal</p>
   </footer>
 
-<<<<<<< HEAD
 <script src="lexer.js"></script>
 <script src="parser.js"></script>
 <script src="threeAddressCode.js"></script>
 <script>
-  function extractValue(field) {
+
+
+  function extractValue(field)
+  {
     if (field == null) return '';
     if (Array.isArray(field)) {
       return field.map(f => f?.value ?? '').join(', ');
-=======
-  <script src="lexer.js"></script>
-  <script src="parser.js"></script>
-  <script src="threeAddressCode.js"></script>
-  <script src="codeOptimizer.js"></script>
-  <script>
-    function extractValue(field) {
-      if (!field) return '';
-      if (Array.isArray(field)) {
-        return field.map(f => f?.value || '').join(', ');
-      }
-      if (typeof field === 'object' && 'value' in field) {
-        return field.value;
-      }
-      return String(field);
->>>>>>> 7172d75 (Updated by Tharun)
     }
     if (typeof field === 'object') {
       return field.value ?? field.name ?? '';
@@ -185,7 +171,6 @@
 
       tbody.appendChild(tr);
     });
-<<<<<<< HEAD
   });
 
   function download(x, y)
@@ -206,10 +191,6 @@
 </script>
 
 
-=======
-
-  </script>
->>>>>>> 7172d75 (Updated by Tharun)
 </body>
 
 </html>
