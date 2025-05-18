@@ -7,7 +7,7 @@ function optimizeTAC(tac) {
   const optimized = [];
   const constantMap = {}; // to hold constants
 
-  console.log('Starting optimization on TAC:', JSON.stringify(tac, null, 2));
+  //console.log('Starting optimization on TAC:', JSON.stringify(tac, null, 2));
 
   for (let instr of tac) {
     console.log('Processing instruction:', instr);
@@ -51,14 +51,14 @@ function optimizeTAC(tac) {
     optimized.push(instr);
   }
 
-  console.log('Optimization result:', JSON.stringify(optimized, null, 2));
+  //console.log('Optimization result:', JSON.stringify(optimized, null, 2));
   return optimized;
 }
 
 function eliminateDeadCode(tac) {
   const used = new Set();
 
-  console.log('Starting dead code elimination on TAC:', JSON.stringify(tac, null, 2));
+  //console.log('Starting dead code elimination on TAC:', JSON.stringify(tac, null, 2));
 
   // Start with variables used in return, param, call, etc.
   tac.forEach(instr => {
@@ -83,7 +83,7 @@ function eliminateDeadCode(tac) {
     }
   }
 
-  console.log('Dead code eliminated TAC:', JSON.stringify(filtered, null, 2));
+  //console.log('Dead code eliminated TAC:', JSON.stringify(filtered, null, 2));
   return filtered;
 }
 function extractValue(field) {
