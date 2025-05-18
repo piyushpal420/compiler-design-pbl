@@ -23,7 +23,8 @@ footer {
 }
 
 header h1 {
-  color: #00ffc3;
+  /* color: #00ffc3; */
+  color: #7fdbff;
   font-size: 2rem;
   margin-bottom: 0;
 }
@@ -52,7 +53,8 @@ footer p {
 .section-title {
   margin-bottom: 10px;
   font-size: 1.25rem;
-  color: #00ffc3;
+  /* color: #00ffc3; */
+  color: #7fdbff;
   display: block;
 }
 
@@ -77,7 +79,8 @@ textarea {
 button {
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #00ffc3;
+  /* background-color: #00ffc3; */
+  color: #7fdbff;
   border: none;
   color: black;
   border-radius: 8px;
@@ -121,7 +124,8 @@ td {
 
 th {
   background-color: #2a2a2a;
-  color: #00ffc3;
+  /* color: #00ffc3; */
+  color: #7fdbff;
   font-weight: 600;
 }
 
@@ -142,14 +146,16 @@ td {
   padding: 8px 12px;
   text-align: center;
   vertical-align: middle;
-  color: #00ffc3;
+  /* color: #00ffc3; */
+  color: #7fdbff;
   background-color: #121212;
   word-break: break-word;
 }
 #quadrupleTable th {
   background-color: #1e1e1e;
   font-weight: 700;
-  color: #00ffb3;
+  /* color: #00ffb3; */
+  color: #7fdbff;
 }
 #quadrupleTable tbody tr:hover {
   background-color: #272727;
