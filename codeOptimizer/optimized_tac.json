@@ -1,0 +1,85 @@
+[
+  {
+    "op": {
+      "type": "KEYWORD",
+      "value": "func"
+    },
+    "name": "main"
+  },
+  {
+    "op": {
+      "type": "OPERATOR",
+      "value": "="
+    },
+    "arg1": {
+      "type": "NUMBER",
+      "value": "100"
+    },
+    "arg2": null,
+    "result": {
+      "type": "IDENTIFIER",
+      "value": "a"
+    }
+  },
+  {
+    "op": {
+      "type": "OPERATOR",
+      "value": "="
+    },
+    "arg1": {
+      "type": "NUMBER",
+      "value": "200"
+    },
+    "arg2": null,
+    "result": {
+      "type": "IDENTIFIER",
+      "value": "b"
+    }
+  },
+  {
+    "op": {
+      "type": "OPERATOR",
+      "value": "="
+    },
+    "arg2": null,
+    "result": {
+      "type": "IDENTIFIER",
+      "value": "c"
+    },
+    "arg1": null
+  },
+  {
+    "op": {
+      "type": "KEYWORD",
+      "value": "call"
+    },
+    "func": "printf",
+    "args": [
+      {
+        "type": "NUMBER",
+        "value": "\"%d\\n\""
+      },
+      {
+        "type": "IDENTIFIER",
+        "value": "c"
+      }
+    ]
+  },
+  {
+    "op": {
+      "type": "KEYWORD",
+      "value": "return"
+    },
+    "value": {
+      "type": "NUMBER",
+      "value": "0"
+    }
+  },
+  {
+    "op": {
+      "type": "KEYWORD",
+      "value": "endfunc"
+    },
+    "name": "main"
+  }
+]
