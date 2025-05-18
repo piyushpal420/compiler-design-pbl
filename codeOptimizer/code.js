@@ -73,4 +73,4 @@ const optimizedTAC = optimizeTAC(tac);
 // Output optimized TAC
 fs.writeFileSync('optimized_tac.json', JSON.stringify(optimizedTAC, null, 2));
 
-console.log('✅ Optimized TAC saved to optimized_tac.json');
+// console.log('✅ Optimized TAC saved to optimized_tac.json');

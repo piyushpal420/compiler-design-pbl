@@ -1,94 +1,158 @@
-
 function isNumeric(val) {
-    return !isNaN(parseFloat(val)) && isFinite(val);
+  return !isNaN(parseFloat(val)) && isFinite(val);
 }
 
 function optimizeTAC(tac) {
-    const optimized = [];
-    const constants = new Map();
+  console.log('THree Address Code : ',tac);
+  const optimized = [];
+  const constantMap = {}; // to hold constants
 
-    tac.forEach(instr => {
-        const opType = instr.op?.type;
-        const opValue = instr.op?.value;
+  console.log('Starting optimization on TAC:', JSON.stringify(tac, null, 2));
 
-        if (opType !== 'OPERATOR') {
-            optimized.push(instr);
-            return;
+  for (let instr of tac) {
+    console.log('Processing instruction:', instr);
+
+    // Constant folding for binary operations with support for constant propagation
+    if (['+', '-', '*', '/'].includes(instr.op)) {
+      // Look up constant values if args are variables
+      const arg1Val = !isNaN(instr.arg1) ? instr.arg1 : constantMap[instr.arg1];
+      const arg2Val = !isNaN(instr.arg2) ? instr.arg2 : constantMap[instr.arg2];
+
+      if (arg1Val !== undefined && arg2Val !== undefined) {
+        const val1 = parseFloat(arg1Val);
+        const val2 = parseFloat(arg2Val);
+        let result;
+
+        switch (instr.op) {
+          case '+': result = val1 + val2; break;
+          case '-': result = val1 - val2; break;
+          case '*': result = val1 * val2; break;
+          case '/': result = val1 / val2; break;
         }
 
-        const result = instr.result?.value;
-        let arg1 = instr.arg1?.value;
-        let arg2 = instr.arg2?.value;
+        // Replace with assignment of constant result
+        optimized.push({ op: '=', arg1: result.toString(), arg2: null, result: instr.result });
+        constantMap[instr.result] = result.toString();
 
-        if (constants.has(arg1)) arg1 = constants.get(arg1);
-        if (constants.has(arg2)) arg2 = constants.get(arg2);
+        console.log(`Constant folding: folded ${val1} ${instr.op} ${val2} = ${result}`);
+        continue;
+      }
+    }
 
-        if (["+", "-", "*", "/"].includes(opValue) && isNumeric(arg1) && isNumeric(arg2)) {
-            const folded = eval(`${arg1} ${opValue} ${arg2}`);
-            constants.set(result, folded.toString());
-            optimized.push({
-                op: { type: "OPERATOR", value: "=" },
-                arg1: { type: "NUMBER", value: folded.toString() },
-                arg2: null,
-                result: { type: "IDENTIFIER", value: result }
-            });
-            return;
-        }
+    // Constant propagation for assignments
+    if (instr.op === '=' && constantMap[instr.arg1]) {
+      console.log(`Constant propagation: replacing ${instr.arg1} with ${constantMap[instr.arg1]}`);
+      optimized.push({ ...instr, arg1: constantMap[instr.arg1] });
+      constantMap[instr.result] = constantMap[instr.arg1];
+      continue;
+    }
 
-        if (opValue === "=" && isNumeric(arg1)) {
-            constants.set(result, arg1);
-        }
+    // Otherwise, push the original instruction
+    optimized.push(instr);
+  }
 
-        const newInstr = {
-            ...instr,
-            arg1: arg1 !== undefined && arg1 !== null
-                ? { type: isNumeric(arg1) ? "NUMBER" : "IDENTIFIER", value: arg1 }
-                : null,
-            arg2: arg2 !== undefined && arg2 !== null
-                ? { type: isNumeric(arg2) ? "NUMBER" : "IDENTIFIER", value: arg2 }
-                : null
-        };
-
-        optimized.push(newInstr);
-    });
-
-    return optimized;
+  console.log('Optimization result:', JSON.stringify(optimized, null, 2));
+  return optimized;
 }
 
+function eliminateDeadCode(tac) {
+  const used = new Set();
+
+  console.log('Starting dead code elimination on TAC:', JSON.stringify(tac, null, 2));
+
+  // Start with variables used in return, param, call, etc.
+  tac.forEach(instr => {
+    if (typeof instr.arg1 === 'string') used.add(instr.arg1);
+    if (typeof instr.arg2 === 'string') used.add(instr.arg2);
+    if (instr.op === 'return' && typeof instr.arg1 === 'string') {
+      used.add(instr.arg1);
+    }
+  });
+
+  const resultUsed = new Set();
+
+  // Traverse backwards: retain only instructions whose result is used
+  const filtered = [];
+  for (let i = tac.length - 1; i >= 0; i--) {
+    const instr = tac[i];
+    if (!instr.result || used.has(instr.result) || ['param', 'call', 'return', 'func', 'endfunc'].includes(instr.op)) {
+      filtered.unshift(instr);
+      // Mark arguments of this instruction as used
+      if (typeof instr.arg1 === 'string') used.add(instr.arg1);
+      if (typeof instr.arg2 === 'string') used.add(instr.arg2);
+    }
+  }
+
+  console.log('Dead code eliminated TAC:', JSON.stringify(filtered, null, 2));
+  return filtered;
+}
 function extractValue(field) {
-    if (!field) return '';
-    if (Array.isArray(field)) {
-        return field.map(f => f?.value || '').join(', ');
-    }
-    if (typeof field === 'object' && 'value' in field) {
-        return field.value;
-    }
-    return String(field);
+  if (!field) return '';
+  if (Array.isArray(field)) {
+    return field.map(f => f?.value || '').join(', ');
+  }
+  if (typeof field === 'object' && 'value' in field) {
+    return field.value;
+  }
+  return String(field);
 }
 
-document.getElementById('optimizeBtn').addEventListener('click', () => {
-    if (!window.lastTAC) {
-        alert("Please generate TAC first.");
-        return;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('optimizeBtn');
+  if (!btn) {
+    console.warn('Optimize button not found in the DOM');
+    return;
+  }
+
+  btn.addEventListener('click', () => {
+    console.log(window)
+    if (!window.lastTAC || !Array.isArray(window.lastTAC)) {
+      alert('No TAC found in window.tac');
+      return;
     }
-    console.log("Clicked")
-    const optimizedTAC = optimizeTAC(window.lastTAC);
+
+    const optimized = optimizeTAC(window.lastTAC);
+    const finalTAC = eliminateDeadCode(optimized);
+
     const tbody = document.getElementById('optimizedQuadrupleBody');
+    if (!tbody) {
+      console.warn('Table body #optimizedQuadrupleBody not found');
+      return;
+    }
     tbody.innerHTML = '';
 
-    optimizedTAC.forEach(instr => {
-        const tr = document.createElement('tr');
-        const op = extractValue(instr.op);
-        const arg1 = extractValue(instr.arg1);
-        const arg2 = extractValue(instr.arg2);
-        const result = extractValue(instr.result);
-
-        [op, arg1, arg2, result].forEach(text => {
-            const td = document.createElement('td');
-            td.textContent = text;
-            tr.appendChild(td);
-        });
-
-        tbody.appendChild(tr);
+    finalTAC.forEach(instr => {
+      const row = document.createElement('tr');
+      ['op', 'arg1', 'arg2', 'result'].forEach(key => {
+        const cell = document.createElement('td');
+        cell.textContent = instr[key] != null ? instr[key] : '';
+        row.appendChild(cell);
+      });
+      tbody.appendChild(row);
     });
+  });
 });
+
+// input for code Optimization 
+
+// #include <stdio.h>
+
+// int main() {
+//     int t0 = 3 + 5;
+//     int x = t0;
+//     int t1 = x + 7;
+//     int y = t1;
+//     int c = 42;  // Assume c is some value to be printed
+//     printf("%d\n", c);
+//     return 0;
+// }
+
+// output 
+// #include <stdio.h>
+
+// int main() {
+//     int c = 42;
+//     printf("%d\n", c);
+//     return 0;
+// }

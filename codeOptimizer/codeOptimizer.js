@@ -140,4 +140,4 @@ let threeAdrrCode=[
     "name": "main"
   }
 ]
-console.log(optimizeTAC(threeAdrrCode));
+// console.log(optimizeTAC(threeAdrrCode));

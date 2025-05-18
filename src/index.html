@@ -105,7 +105,7 @@
 
     <section id="optimizedTacOutput" class="output-section">
       <h2 class="section-title">Optimized Three Address Code (Quadruple Representation)</h2>
-      <table id="quadrupleTable">
+      <table id="optimizedQuadrupleTable">
         <thead>
           <tr>
             <th>Op</th>
@@ -152,6 +152,7 @@
     }
     const tac = generateTAC(window.lastAST);
     window.lastTAC = tac;
+    // console.log(tac);
     //download(tac, "tac");
     const tbody = document.getElementById('quadrupleBody');
     tbody.innerHTML = '';

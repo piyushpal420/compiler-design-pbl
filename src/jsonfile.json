@@ -1,0 +1,219 @@
+Starting optimization on TAC: [
+  {   "op": "func",  "arg1": null,    "arg2": null,    "result": "main"  },
+  {    "op": "=",    "arg1": "100",    "arg2": null,    "result": "a"  },
+  {    "op": "=",    "arg1": "200",    "arg2": null,    "result": "b"  },
+  {    "op": "+",    "arg1": "a",    "arg2": "b",    "result": "t0"  },
+  {    "op": "=",    "arg1": "t0",    "arg2": null,    "result": "c"  },
+  {    "op": "+",    "arg1": "c",    "arg2": "100",    "result": "t1"  },
+  {    "op": "=",    "arg1": "t1",    "arg2": null,    "result": "d"  },
+  {    "op": "*",    "arg1": "d",    "arg2": "100",    "result": "t2"  },
+  {    "op": "=",    "arg1": "t2",    "arg2": null,    "result": "e"  },
+  {    "op": "param",    "arg1": "\"%d\\n\"",    "arg2": null,    "result": null  },
+  {    "op": "param",    "arg1": "c",    "arg2": null,    "result": null  },
+  {    "op": "call",    "arg1": "printf",    "arg2": null,    "result": null  },
+  {    "op": "return",    "arg1": "0",    "arg2": null,    "result": null  },
+  {    "op": "endfunc",    "arg1": null,    "arg2": null,    "result": "main"  }
+]
+Processing instruction: { op: 'func', arg1: null, arg2: null, result: 'main' }
+Processing instruction: { op: '=', arg1: '100', arg2: null, result: 'a' }
+Processing instruction: { op: '=', arg1: '200', arg2: null, result: 'b' }
+Processing instruction: { op: '+', arg1: 'a', arg2: 'b', result: 't0' }
+Processing instruction: { op: '=', arg1: 't0', arg2: null, result: 'c' }
+Processing instruction: { op: '+', arg1: 'c', arg2: '100', result: 't1' }
+Processing instruction: { op: '=', arg1: 't1', arg2: null, result: 'd' }
+Processing instruction: { op: '*', arg1: 'd', arg2: '100', result: 't2' }
+Processing instruction: { op: '=', arg1: 't2', arg2: null, result: 'e' }
+Processing instruction: { op: 'param', arg1: '"%d\\n"', arg2: null, result: null }
+Processing instruction: { op: 'param', arg1: 'c', arg2: null, result: null }
+Processing instruction: { op: 'call', arg1: 'printf', arg2: null, result: null }
+Processing instruction: { op: 'return', arg1: '0', arg2: null, result: null }
+Processing instruction: { op: 'endfunc', arg1: null, arg2: null, result: 'main' }
+Optimization result: [
+  {    "op": "func",    "arg1": null,    "arg2": null,    "result": "main"  },
+  {    "op": "=",    "arg1": "100",    "arg2": null,    "result": "a"  },
+  {    "op": "=",    "arg1": "200",    "arg2": null,    "result": "b"  },
+  {    "op": "+",    "arg1": "a",    "arg2": "b",    "result": "t0"  },
+  {    "op": "=",    "arg1": "t0",    "arg2": null,    "result": "c"  },
+  {    "op": "+",    "arg1": "c",    "arg2": "100",    "result": "t1"  },
+  {    "op": "=",    "arg1": "t1",    "arg2": null,    "result": "d"  },
+  {    "op": "*",    "arg1": "d",    "arg2": "100",    "result": "t2"  },
+  {    "op": "=",    "arg1": "t2",    "arg2": null,    "result": "e"  },
+  {    "op": "param",    "arg1": "\"%d\\n\"",    "arg2": null,    "result": null  },
+  {    "op": "param",    "arg1": "c",    "arg2": null,    "result": null  },
+  {    "op": "call",    "arg1": "printf",    "arg2": null,    "result": null  },
+  {    "op": "return",    "arg1": "0",    "arg2": null,    "result": null  },
+  {    "op": "endfunc",    "arg1": null,    "arg2": null,    "result": "main"  }
+]
+Starting dead code elimination on TAC: [
+  {    "op": "func",    "arg1": null,    "arg2": null,    "result": "main"  },
+  {    "op": "=",    "arg1": "100",    "arg2": null,    "result": "a"  },
+  {    "op": "=",    "arg1": "200",    "arg2": null,    "result": "b"  },
+  {    "op": "+",    "arg1": "a",    "arg2": "b",    "result": "t0"  },
+  {    "op": "=",    "arg1": "t0",    "arg2": null,    "result": "c"  },
+  {    "op": "+",    "arg1": "c",    "arg2": "100",    "result": "t1"  },
+  {    "op": "=",    "arg1": "t1",    "arg2": null,    "result": "d"  },
+  {    "op": "*",    "arg1": "d",    "arg2": "100",    "result": "t2"  },
+  {    "op": "=",    "arg1": "t2",    "arg2": null,    "result": "e"  },
+  {    "op": "param",    "arg1": "\"%d\\n\"",    "arg2": null,    "result": null  },
+  {    "op": "param",    "arg1": "c",    "arg2": null,    "result": null  },
+  {    "op": "call",    "arg1": "printf",    "arg2": null,    "result": null  },
+  {    "op": "return",    "arg1": "0",    "arg2": null,    "result": null  },
+  {    "op": "endfunc",    "arg1": null,    "arg2": null,    "result": "main"  }
+]
+Variables used: [
+  '100',    '200',
+  'a',      'b',
+  't0',     'c',
+  't1',     'd',
+  't2',     '"%d\\n"',
+  'printf', '0'
+]
+Dead code eliminated TAC: [
+  {
+    "op": "=",
+    "arg1": "100",
+    "arg2": null,
+    "result": "a"
+  },
+  {
+    "op": "=",
+    "arg1": "200",
+    "arg2": null,
+    "result": "b"
+  },
+  {
+    "op": "+",
+    "arg1": "a",
+    "arg2": "b",
+    "result": "t0"
+  },
+  {
+    "op": "=",
+    "arg1": "t0",
+    "arg2": null,
+    "result": "c"
+  },
+  {
+    "op": "+",
+    "arg1": "c",
+    "arg2": "100",
+    "result": "t1"
+  },
+  {
+    "op": "=",
+    "arg1": "t1",
+    "arg2": null,
+    "result": "d"
+  },
+  {
+    "op": "*",
+    "arg1": "d",
+    "arg2": "100",
+    "result": "t2"
+  },
+  {
+    "op": "param",
+    "arg1": "\"%d\\n\"",
+    "arg2": null,
+    "result": null
+  },
+  {
+    "op": "param",
+    "arg1": "c",
+    "arg2": null,
+    "result": null
+  },
+  {
+    "op": "call",
+    "arg1": "printf",
+    "arg2": null,
+    "result": null
+  },
+  {
+    "op": "return",
+    "arg1": "0",
+    "arg2": null,
+    "result": null
+  }
+]
+[
+  { op: '=', arg1: '100', arg2: null, result: 'a' },
+  { op: '=', arg1: '200', arg2: null, result: 'b' },
+  { op: '+', arg1: 'a', arg2: 'b', result: 't0' },
+  { op: '=', arg1: 't0', arg2: null, result: 'c' },
+  { op: '+', arg1: 'c', arg2: '100', result: 't1' },
+  { op: '=', arg1: 't1', arg2: null, result: 'd' },
+  { op: '*', arg1: 'd', arg2: '100', result: 't2' },
+  { op: 'param', arg1: '"%d\\n"', arg2: null, result: null },
+  { op: 'param', arg1: 'c', arg2: null, result: null },
+  { op: 'call', arg1: 'printf', arg2: null, result: null },
+  { op: 'return', arg1: '0', arg2: null, result: null }
+]
+Final optimized TAC: [
+  {
+    "op": "=",
+    "arg1": "100",
+    "arg2": null,
+    "result": "a"
+  },
+  {
+    "op": "=",
+    "arg1": "200",
+    "arg2": null,
+    "result": "b"
+  },
+  {
+    "op": "+",
+    "arg1": "a",
+    "arg2": "b",
+    "result": "t0"
+  },
+  {
+    "op": "=",
+    "arg1": "t0",
+    "arg2": null,
+    "result": "c"
+  },
+  {
+    "op": "+",
+    "arg1": "c",
+    "arg2": "100",
+    "result": "t1"
+  },
+  {
+    "op": "=",
+    "arg1": "t1",
+    "arg2": null,
+    "result": "d"
+  },
+  {
+    "op": "*",
+    "arg1": "d",
+    "arg2": "100",
+    "result": "t2"
+  },
+  {
+    "op": "param",
+    "arg1": "\"%d\\n\"",
+    "arg2": null,
+    "result": null
+  },
+  {
+    "op": "param",
+    "arg1": "c",
+    "arg2": null,
+    "result": null
+  },
+  {
+    "op": "call",
+    "arg1": "printf",
+    "arg2": null,
+    "result": null
+  },
+  {
+    "op": "return",
+    "arg1": "0",
+    "arg2": null,
+    "result": null
+  }
+]
