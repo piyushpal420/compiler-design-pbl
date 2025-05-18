@@ -97,6 +97,21 @@ function extractValue(field) {
   return String(field);
 }
 
+function download(x, y)
+  {
+    
+    // Download AST as JSON automatically
+    const blob = new Blob([JSON.stringify(x, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = y+'.json';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('optimizeBtn');
@@ -114,6 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const optimized = optimizeTAC(window.lastTAC);
     const finalTAC = eliminateDeadCode(optimized);
+    // download(finalTAC,'OptimizedCode')
+    window.finalOptimizedCode=finalTAC;
 
     const tbody = document.getElementById('optimizedQuadrupleBody');
     if (!tbody) {
