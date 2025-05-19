@@ -1,12 +1,15 @@
+// targetCodeGenerator.js
+
 function generateAssembly(tacJson) {
   console.log("Starting assembly generation...");
   let regCount = 1;
   let varToReg = {};
-  let getNextReg = () => {
+  const getNextReg = () => {
     const reg = `R${regCount++}`;
     console.log(`Allocating new register: ${reg}`);
     return reg;
   };
+
   let code = [];
   let paramQueue = [];
 
@@ -14,12 +17,11 @@ function generateAssembly(tacJson) {
     const { op, arg1, arg2, result } = instr;
     console.log(`Processing instruction #${index + 1}:`, instr);
 
-    const getOperand = (operand) => {
+    const getOperand = operand => {
       if (operand == null) return '';
-      const reg = varToReg[operand];
-      if (reg) {
-        console.log(`Operand '${operand}' mapped to register '${reg}'`);
-        return reg;
+      if (varToReg[operand]) {
+        console.log(`Operand '${operand}' mapped to register '${varToReg[operand]}'`);
+        return varToReg[operand];
       }
       console.log(`Operand '${operand}' used as is`);
       return operand;
@@ -47,14 +49,9 @@ function generateAssembly(tacJson) {
         const reg2 = getOperand(arg2);
         const destReg = getNextReg();
         varToReg[result] = destReg;
-        let instruction = {
-          "+": "ADD",
-          "-": "SUB",
-          "*": "MUL",
-          "/": "DIV"
-        }[op];
-        console.log(`Generating ${instruction} instruction: ${destReg} = ${reg1} ${op} ${reg2}`);
-        code.push(`${instruction} ${destReg}, ${reg1}, ${reg2}`);
+        const instrMap = { "+": "ADD", "-": "SUB", "*": "MUL", "/": "DIV" };
+        console.log(`Generating ${instrMap[op]} instruction: ${destReg} = ${reg1} ${op} ${reg2}`);
+        code.push(`${instrMap[op]} ${destReg}, ${reg1}, ${reg2}`);
         break;
       }
 
@@ -67,14 +64,12 @@ function generateAssembly(tacJson) {
       case "call":
         if (arg1 === "printf") {
           const format = paramQueue.shift();
-          const value = paramQueue.shift();
+          const value  = paramQueue.shift();
           console.log(`Generating PRINT statement with format: ${format} and value: ${value}`);
           code.push(`PRINT ${format}, ${value}`);
         } else {
           console.log(`Generating CALL statement for function ${arg1} with params:`, paramQueue);
-          paramQueue.forEach(param => {
-            code.push(`PARAM ${param}`);
-          });
+          paramQueue.forEach(p => code.push(`PARAM ${p}`));
           code.push(`CALL ${arg1}`);
         }
         paramQueue = [];
@@ -88,7 +83,6 @@ function generateAssembly(tacJson) {
 
       case "endfunc":
         console.log("End of function encountered.");
-        // Optional: code.push("; end of function");
         break;
 
       default:
@@ -102,14 +96,16 @@ function generateAssembly(tacJson) {
 }
 
 function displayAssemblyCode(assemblyCode) {
-  const tbody = document.getElementById('assemblyBody');
+  // ← Look up the correct <tbody> ID
+  const tbody = document.getElementById('targetCodeBody');
   if (!tbody) {
-    console.error("Assembly table body element (#assemblyBody) not found in DOM.");
+    console.error("Assembly table body element (#targetCodeBody) not found in DOM.");
     return;
   }
-  tbody.innerHTML = ''; // Clear previous output
 
-  assemblyCode.forEach((instr, idx) => {
+  tbody.innerHTML = ''; // clear previous
+
+  assemblyCode.forEach(instr => {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.textContent = instr;
@@ -120,9 +116,14 @@ function displayAssemblyCode(assemblyCode) {
   console.log("Assembly code displayed in table.");
 }
 
-// Button click handler to generate and display assembly code from lastTAC
+// Hook up the button once DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('generateAssemblyBtn').addEventListener('click', () => {
+  const btn = document.getElementById('generateAssemblyBtn');
+  if (!btn) {
+    console.error("Generate Assembly button not found in DOM.");
+    return;
+  }
+  btn.addEventListener('click', () => {
     if (!window.lastTAC) {
       alert('Please generate TAC first.');
       return;
@@ -133,5 +134,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Also expose for direct calls if your index.html uses generateTargetCode(...)
 window.generateTargetCode = generateAssembly;
-

@@ -7,6 +7,7 @@
   <title>C Compiler Visualizer</title>
   <link rel="stylesheet" href="style.css" />
   <style>
+    /* Existing inline styles… */
     #quadrupleTable,
     #optimizedQuadrupleTable,
     #targetCodeTable {
@@ -16,38 +17,7 @@
       font-family: monospace;
       font-size: 0.95rem;
     }
-
-    #quadrupleTable th,
-    #quadrupleTable td,
-    #optimizedQuadrupleTable th,
-    #optimizedQuadrupleTable td,
-    #targetCodeTable th,
-    #targetCodeTable td {
-      border: 1px solid #444;
-      padding: 8px 12px;
-      text-align: center;
-      vertical-align: middle;
-      /* color: #00ffc3; */
-      color: #7fdbff;
-      background-color: #121212;
-      word-break: break-word;
-    }
-
-    #quadrupleTable th,
-    #optimizedQuadrupleTable th,
-    #targetCodeTable th {
-      background-color: #1e1e1e;
-      font-weight: 700;
-      /* color: #00ffb3; */
-      color: #7fdbff;
-    }
-
-    #quadrupleTable tbody tr:hover,
-    #optimizedQuadrupleTable tbody tr:hover,
-    #targetCodeTable tbody tr:hover {
-      background-color: #272727;
-      cursor: default;
-    }
+    /* …rest of your inline CSS… */
   </style>
 </head>
 
@@ -57,6 +27,7 @@
   </header>
 
   <main class="container">
+    <!-- Input Section -->
     <section class="input-section">
       <label for="codeInput" class="section-title">Your C Code</label>
       <textarea id="codeInput" class="code">int main()
@@ -74,10 +45,11 @@
         <button id="parseBtn">Parse</button>
         <button id="tacBtn">Show TAC</button>
         <button id="optimizeBtn">Optimize TAC</button>
-        <button id="generateAssemblyBtn">Generate Target Code</button> <!-- New Button -->
+        <button id="generateAssemblyBtn">Generate Target Code</button>
       </div>
     </section>
 
+    <!-- Tokens Output -->
     <section id="tokenOutput" class="output-section">
       <h2 class="section-title">Tokens</h2>
       <div class="table-container">
@@ -93,10 +65,14 @@
       </div>
     </section>
 
+    <!-- AST Output -->
     <section id="astOutput" class="output-section">
       <h2 class="section-title">Abstract Syntax Tree</h2>
+      <div id="astTree"></div>
+      <ul id="semErrors"></ul>
     </section>
 
+    <!-- Three Address Code Output -->
     <section id="tacOutput" class="output-section">
       <h2 class="section-title">Three Address Code (Quadruple Representation)</h2>
       <table id="quadrupleTable">
@@ -112,6 +88,7 @@
       </table>
     </section>
 
+    <!-- Optimized TAC Output -->
     <section id="optimizedTacOutput" class="output-section">
       <h2 class="section-title">Optimized Three Address Code (Quadruple Representation)</h2>
       <table id="optimizedQuadrupleTable">
@@ -127,7 +104,7 @@
       </table>
     </section>
 
-    <!-- New section for Target Code -->
+    <!-- Target Assembly Code Output -->
     <section id="targetCodeOutput" class="output-section">
       <h2 class="section-title">Generated Target Assembly Code</h2>
       <table id="targetCodeTable">
@@ -146,13 +123,26 @@
     <p>By Mehdi Zaidi, Kirri Tharun, Tushar Dwivedi and Piyush Pal</p>
   </footer>
 
+  <!-- Scripts loaded in proper order -->
   <script src="lexer.js"></script>
+  <script src="semantic.js"></script>
   <script src="parser.js"></script>
   <script src="threeAddressCode.js"></script>
   <script src="codeOptimizer.js"></script>
-  <script src="targetCodeGenerator.js"></script> <!-- Added here -->
+  <script src="targetCodeGenerator.js"></script>
 
   <script>
+    // Grab button references
+    const parseBtn = document.getElementById('parseBtn');
+    const tacBtn = document.getElementById('tacBtn');
+    const optimizeBtn = document.getElementById('optimizeBtn');
+    const generateAssemblyBtn = document.getElementById('generateAssemblyBtn');
+
+    // Disable TAC/Optimize/Generate until parsing confirms no semantic errors
+    tacBtn.disabled = true;
+    optimizeBtn.disabled = true;
+    generateAssemblyBtn.disabled = true;
+
     function extractValue(field) {
       if (field == null) return '';
       if (Array.isArray(field)) {
@@ -164,7 +154,42 @@
       return String(field);
     }
 
-    document.getElementById('tacBtn').addEventListener('click', () => {
+    // Parse button handler
+    parseBtn.addEventListener('click', () => {
+      const codeInput = document.getElementById('codeInput').value;
+      const tokens    = tokenize(codeInput);   // from lexer.js
+      const ast       = parse(tokens);         // from parser.js
+
+      // Render AST
+      const treeDiv = document.getElementById('astTree');
+      treeDiv.innerHTML = `<ul>${renderAST(ast)}</ul>`;
+      attachTreeInteractivity(treeDiv);
+
+      // Semantic analysis
+      const semErrors = semanticAnalyze(ast).errors;
+      const errList   = document.getElementById('semErrors');
+      if (semErrors.length === 0) {
+        errList.innerHTML = `<li>No semantic errors!</li>`;
+        errList.style.color = '#0f0';
+      } else {
+        errList.innerHTML = semErrors
+          .map(e => `<li>${e.message}</li>`)
+          .join('');
+        errList.style.color = '#f66';
+      }
+
+      // Save AST and error state
+      window.lastAST = ast;
+
+      // Enable or disable subsequent buttons
+      const hasErrors = semErrors.length > 0;
+      tacBtn.disabled = hasErrors;
+      optimizeBtn.disabled = hasErrors;
+      generateAssemblyBtn.disabled = hasErrors;
+    });
+
+    // TAC button handler
+    tacBtn.addEventListener('click', () => {
       if (!window.lastAST) {
         alert('Please parse the code first.');
         return;
@@ -173,27 +198,44 @@
       window.lastTAC = tac;
       const tbody = document.getElementById('quadrupleBody');
       tbody.innerHTML = '';
-
       tac.forEach(instr => {
         const tr = document.createElement('tr');
-
-        const op = extractValue(instr.op);
-        const arg1 = extractValue(instr.arg1);
-        const arg2 = extractValue(instr.arg2);
-        const result = extractValue(instr.result);
-
-        [op, arg1, arg2, result].forEach(text => {
-          const td = document.createElement('td');
-          td.textContent = text;
-          tr.appendChild(td);
-        });
-
+        [instr.op, instr.arg1, instr.arg2, instr.result]
+          .map(extractValue)
+          .forEach(text => {
+            const td = document.createElement('td');
+            td.textContent = text;
+            tr.appendChild(td);
+          });
         tbody.appendChild(tr);
       });
     });
 
-    // Event listener for generating target code
-    document.getElementById('generateAssemblyBtn').addEventListener('click', () => {
+    // Optimize TAC button handler
+    optimizeBtn.addEventListener('click', () => {
+      if (!window.lastTAC) {
+        alert('Please generate the TAC first.');
+        return;
+      }
+      const optimized = optimizeTAC(window.lastTAC);
+      window.lastOptimizedTAC = optimized;
+      const tbody = document.getElementById('optimizedQuadrupleBody');
+      tbody.innerHTML = '';
+      optimized.forEach(instr => {
+        const tr = document.createElement('tr');
+        [instr.op, instr.arg1, instr.arg2, instr.result]
+          .map(extractValue)
+          .forEach(text => {
+            const td = document.createElement('td');
+            td.textContent = text;
+            tr.appendChild(td);
+          });
+        tbody.appendChild(tr);
+      });
+    });
+
+    // Generate Assembly button handler
+    generateAssemblyBtn.addEventListener('click', () => {
       if (!window.lastTAC) {
         alert('Please generate the TAC first.');
         return;
@@ -201,8 +243,6 @@
       const targetCode = generateTargetCode(window.lastTAC);
       const tbody = document.getElementById('targetCodeBody');
       tbody.innerHTML = '';
-
-      // Assume generateTargetCode returns an array of instructions as strings
       targetCode.forEach(instr => {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
@@ -211,19 +251,6 @@
         tbody.appendChild(tr);
       });
     });
-
-    function download(x, y) {
-      const blob = new Blob([JSON.stringify(x, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = y + '.json';
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
   </script>
 </body>
 

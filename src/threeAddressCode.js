@@ -129,4 +129,3 @@ function generateTAC(ast) {
 
 window.generateTAC = generateTAC;
 
-
