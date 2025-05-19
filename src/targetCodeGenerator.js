@@ -1,4 +1,3 @@
-// targetCodeGenerator.js
 
 function generateAssembly(tacJson) {
   console.log("Starting assembly generation...");
@@ -96,14 +95,13 @@ function generateAssembly(tacJson) {
 }
 
 function displayAssemblyCode(assemblyCode) {
-  // ← Look up the correct <tbody> ID
   const tbody = document.getElementById('targetCodeBody');
   if (!tbody) {
     console.error("Assembly table body element (#targetCodeBody) not found in DOM.");
     return;
   }
 
-  tbody.innerHTML = ''; // clear previous
+  tbody.innerHTML = '';
 
   assemblyCode.forEach(instr => {
     const tr = document.createElement('tr');
@@ -116,7 +114,6 @@ function displayAssemblyCode(assemblyCode) {
   console.log("Assembly code displayed in table.");
 }
 
-// Hook up the button once DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('generateAssemblyBtn');
   if (!btn) {
@@ -133,6 +130,4 @@ document.addEventListener('DOMContentLoaded', () => {
     displayAssemblyCode(assemblyCode);
   });
 });
-
-// Also expose for direct calls if your index.html uses generateTargetCode(...)
 window.generateTargetCode = generateAssembly;

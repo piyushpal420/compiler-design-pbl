@@ -20,7 +20,6 @@ function generateTAC(ast) {
         return node.name;
 
       case "Unknown":
-        // Strip leading operator if merged
         if (typeof node.value === 'string') {
           return node.value.replace(/^[+\-*/]/, '');
         }
@@ -43,25 +42,21 @@ function generateTAC(ast) {
 
       case "FunctionCall":
       case "CallExpression": {
-        // Determine function name
         let funcName = typeof node.name === 'string'
           ? node.name
           : node.name?.name || node.callee?.name || 'anonymous_func';
 
-        // Determine arguments array
         const argsArr = Array.isArray(node.args)
           ? node.args
           : Array.isArray(node.arguments)
             ? node.arguments
             : [];
 
-        // Emit param for each argument
         argsArr.forEach(argNode => {
           const val = processExpression(argNode);
           tac.push({ op: 'param', arg1: val, arg2: null, result: null });
         });
-
-        // Emit call
+        
         tac.push({ op: 'call', arg1: funcName, arg2: null, result: null });
         return null;
       }
